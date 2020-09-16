@@ -26,11 +26,11 @@ import pl.aprilapps.easyphotopicker.MediaSource;
 public class MainActivity extends AppCompatActivity {
 
     private static final String PHOTOS_KEY = "easy_image_photos_list";
-    private static final int CHOOSER_PERMISSIONS_REQUEST_CODE = 7459;
-    private static final int CAMERA_REQUEST_CODE = 7500;
-    private static final int CAMERA_VIDEO_REQUEST_CODE = 7501;
-    private static final int GALLERY_REQUEST_CODE = 7502;
-    private static final int DOCUMENTS_REQUEST_CODE = 7503;
+    public static final int CHOOSER_PERMISSIONS_REQUEST_CODE = 7459;
+    public static final int CAMERA_REQUEST_CODE = 7500;
+    public static final int CAMERA_VIDEO_REQUEST_CODE = 7501;
+    public static final int GALLERY_REQUEST_CODE = 7502;
+    public static final int DOCUMENTS_REQUEST_CODE = 7503;
 
     protected RecyclerView recyclerView;
 
