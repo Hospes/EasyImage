@@ -1,4 +1,12 @@
 [![](https://jitpack.io/v/hospes/EasyImage.svg)](https://jitpack.io/#hospes/EasyImage)
+
+# THIS IS FORK
+## Reason
+So this is the fork as mentioned in the title adn the reason is to upgrade current EasyImage ib to support latest (mostly alpha) dependencies and features that provides `androidx`.
+In our case i'm talking about `ActivityResultContract` feature that provides safe interface for sharing data between activitie and deprecate default `onActivityResut` way.
+
+# Original readme can be found here: [readme.md](https://github.com/jkwiecien/EasyImage/blob/master/README.md)
+
 # What is it?
 EasyImage allows you to easily capture images and videos from the gallery, camera or documents without creating lots of boilerplate.
 
@@ -11,13 +19,13 @@ This library requires specific runtime permissions. Declare it in your `AndroidM
 <uses-permission android:name="android.permission.CAMERA" />
 ```
 
-**Please note**: for devices running API 23 (marshmallow) you have to request this permissions in the runtime, before calling `EasyImage.openCamera()`. It's demonstrated in the sample app.
+**Please note**: for devices running API 23 (marshmallow) you have to request this permissions in the runtime, before calling `EasyContracts.CameraForImage/EasyContracts.CameraForVideo.launch()`. It's demonstrated in the sample app.
 
 **There is also one issue about runtime permissions**. According to the docs: 
 
     If your app targets M and above and declares as using the CAMERA permission which is not granted, then attempting to use this action will result in a SecurityException.
 
-For this reason, if your app uses `CAMERA` permission, you should check it along **with** `WRITE_EXTERNAL_STORAGE` before calling `EasyImage.openCamera()`
+For this reason, if your app uses `CAMERA` permission, you should check it along **with** `WRITE_EXTERNAL_STORAGE` before calling `EasyContracts.CameraForImage/EasyContracts.CameraForVideo.launch()`
 
 ## Gradle dependency
 Get the latest version from jitpack
@@ -27,80 +35,37 @@ Get the latest version from jitpack
 # Usage
 ## Essentials
 
-Create your EasyImageInstance like this:
-```java
-EasyImage easyImage = new EasyImage.Builder(context)
-
-// Chooser only
-// Will appear as a system chooser title, DEFAULT empty string
-//.setChooserTitle("Pick media")
-// Will tell chooser that it should show documents or gallery apps
-//.setChooserType(ChooserType.CAMERA_AND_DOCUMENTS)  you can use this or the one below
-//.setChooserType(ChooserType.CAMERA_AND_GALLERY)
-
-// Setting to true will cause taken pictures to show up in the device gallery, DEFAULT false
-.setCopyImagesToPublicGalleryFolder(false)
-// Sets the name for images stored if setCopyImagesToPublicGalleryFolder = true
-.setFolderName("EasyImage sample")
-
-// Allow multiple picking
-.allowMultiple(true)
-.build();
-```
-
-### Taking image straight from camera
-- `easyImage.openCameraForImage(Activity activity,);`
-- `easyImage.openCameraForImage(Fragment fragment);`
-
-### Capturing video
-- `easyImage.openCameraForVideo(Activity activity);`
-- `easyImage.openCameraForVideo(Fragment fragment);`
-
-### Taking image from gallery or the gallery picker if there is more than 1 gallery app
-- `easyImage.openGallery(Activity activity);`
-- `easyImage.openGallery(Fragment fragment);`
-
-### Taking image from documents
-- `easyImage.openDocuments(Activity activity);`
-- `easyImage.openDocuments(Fragment fragment);`
-
-### Displaying system picker to chose from camera, documents, or gallery if no documents apps are available
-- `easyImage.openChooser(Activity activity);`
-- `easyImage.openChooser(Fragment fragment);`
-
-### Getting the photo file
-
-```java
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        easyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
-            @Override
-            public void onMediaFilesPicked(MediaFile[] imageFiles, MediaSource source) {
-                onPhotosReturned(imageFiles);
-            }
-
-            @Override
-            public void onImagePickerError(@NonNull Throwable error, @NonNull MediaSource source) {
-                //Some error handling
-                error.printStackTrace();
-            }
-
-            @Override
-            public void onCanceled(@NonNull MediaSource source) {
-                //Not necessary to remove any files manually anymore
-            }
-        });
+Register your EasyContract result receiver instance like this:
+```kotlin
+private val gallery = registerForActivityResult(EasyContracts.Gallery(this)) { result -> 
+    when (result) {
+        /* Handle success result */
+        is EasyContracts.Result.Success -> onPhotosReturned(result.files.toTypedArray())
+        
+        /* Handle error result */
+        is EasyContracts.Result.Error -> result.throwable.printStackTrace() 
+        
+        /* Handle canceled result */
+        is EasyContracts.Result.Canceled -> Unit 
     }
+}
 ```
 
-# Known issues
-Library was pretty much rewritten from scratch in kotlin on 29.03.2019. Initial version 3.0.0 might be unstable. In case of problems fallback to version 2.1.1
-Also version 3.0.0 is not backward compatible and will require some changes of those who used previous versions. These are not big tho. Updated readme explains it all.
+Launch intent like this:
+```kotlin
+gallery.launch(true) /* true/false - means allowing multi selecting of images */
+```
+
+### EasyContracts class contain number of ready to go contracts
+- `EasyContracts.Chooser`
+- `EasyContracts.Documents`
+- `EasyContracts.Gallery`
+- `EasyContracts.CameraForImage`
+- `EasyContracts.CameraForVideo`
 
 # License
 
-    Copyright 2015 Jacek Kwiecień.
+    Copyright 2020 Andrew Khloponin.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
