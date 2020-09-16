@@ -92,7 +92,7 @@ object Files {
 
     @Throws(IOException::class)
     internal fun pickedExistingPicture(context: Context, photoUri: Uri): File {
-        val pictureInputStream = context.contentResolver.openInputStream(photoUri)
+        val pictureInputStream = context.contentResolver.openInputStream(photoUri) ?: throw IOException()
         val directory = tempImageDirectory(context)
         val photoFile = File(directory, generateFileName() + "." + getMimeType(context, photoUri))
         photoFile.createNewFile()

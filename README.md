@@ -1,4 +1,4 @@
-[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-EasyImage-green.svg?style=true)](https://android-arsenal.com/details/1/2725) [![](https://jitpack.io/v/jkwiecien/EasyImage.svg)](https://jitpack.io/#jkwiecien/EasyImage)
+[![](https://jitpack.io/v/hospes/EasyImage.svg)](https://jitpack.io/#hospes/EasyImage)
 # What is it?
 EasyImage allows you to easily capture images and videos from the gallery, camera or documents without creating lots of boilerplate.
 
@@ -22,7 +22,7 @@ For this reason, if your app uses `CAMERA` permission, you should check it along
 ## Gradle dependency
 Get the latest version from jitpack
 
-[![](https://jitpack.io/v/jkwiecien/EasyImage.svg)](https://jitpack.io/#jkwiecien/EasyImage)
+[![](https://jitpack.io/v/hospes/EasyImage.svg)](https://jitpack.io/#hospes/EasyImage)
 
 # Usage
 ## Essentials
