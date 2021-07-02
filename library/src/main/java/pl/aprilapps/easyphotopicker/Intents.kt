@@ -25,20 +25,12 @@ internal object Intents {
         }
     }
 
-    internal fun plainGalleryPickerIntent(): Intent {
-        return Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-    }
+    private fun plainGalleryPickerIntent(): Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
 
-    internal fun createDocumentsIntent(): Intent {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "image/*"
-        return intent
-    }
+    internal fun createDocumentsIntent(): Intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "image/*" }
 
-    internal fun createGalleryIntent(allowMultiple: Boolean): Intent {
-        val intent = plainGalleryPickerIntent()
-        if (Build.VERSION.SDK_INT >= 18) intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultiple)
-        return intent
+    internal fun createGalleryIntent(allowMultiple: Boolean): Intent = plainGalleryPickerIntent().apply {
+        if (Build.VERSION.SDK_INT >= 18) putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultiple)
     }
 
     internal fun createCameraForImageIntent(context: Context, fileUri: Uri): Intent {
@@ -66,9 +58,15 @@ internal object Intents {
     }
 
     @Throws(IOException::class)
-    internal fun createChooserIntent(context: Context, chooserTitle: String, chooserType: ChooserType, cameraFileUri: Uri, allowMultiple: Boolean): Intent {
+    internal fun createChooserIntent(
+        context: Context,
+        chooserTitle: String,
+        chooserType: ChooserType,
+        cameraFileUri: Uri,
+        allowMultiple: Boolean
+    ): Intent {
         val cameraIntents = ArrayList<Intent>()
-        val captureIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+        val captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         val packageManager = context.packageManager
         val camList = packageManager.queryIntentActivities(captureIntent, 0)
         for (resolveInfo in camList) {

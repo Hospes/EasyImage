@@ -9,80 +9,85 @@ import androidx.activity.result.contract.ActivityResultContract
 
 object EasyContracts {
 
-    class Chooser(private val ctx: Context,
-                  private val config: ChooserConfig) : ActivityResultContract<Boolean, Result>(), HasFile {
+    class Chooser(
+        private val config: ChooserConfig,
+        private val ctx: () -> Context,
+    ) : ActivityResultContract<Boolean, Result>(), HasFile {
         override var lastCameraFile: MediaFile? = null
 
         override fun createIntent(context: Context, multiple: Boolean): Intent =
-                Files.createCameraPictureFile(context).also { lastCameraFile = it }
-                        .let {
-                            Intents.createChooserIntent(
-                                    context = context,
-                                    chooserTitle = config.chooserTitle,
-                                    chooserType = config.chooserType,
-                                    cameraFileUri = it.uri,
-                                    allowMultiple = multiple
-                            )
-                        }
+            Files.createCameraPictureFile(context).also { lastCameraFile = it }.let {
+                Intents.createChooserIntent(
+                    context = context,
+                    chooserTitle = config.chooserTitle,
+                    chooserType = config.chooserType,
+                    cameraFileUri = it.uri,
+                    allowMultiple = multiple
+                )
+            }
 
         override fun parseResult(resultCode: Int, intent: Intent?): Result {
             if (resultCode != Activity.RESULT_OK) return Result.Canceled
             Log.d(EASYIMAGE_LOG_TAG, "File returned from chooser")
             return if (intent != null && !Intents.isTherePhotoTakenWithCameraInsideIntent(intent) && intent.data != null)
-                onPickedExistingPictures(ctx, intent).also { removeCameraFileAndCleanup() }
-            else onPictureReturnedFromCamera(ctx, lastCameraFile, config)
+                onPickedExistingPictures(ctx.invoke(), intent).also { removeCameraFileAndCleanup() }
+            else onPictureReturnedFromCamera(ctx.invoke(), lastCameraFile, config)
         }
     }
 
-    class Documents(private val ctx: Context) : ActivityResultContract<Unit, Result>() {
+    class Documents(private val ctx: () -> Context) : ActivityResultContract<Unit, Result>() {
         override fun createIntent(context: Context, input: Unit?): Intent = Intents.createDocumentsIntent()
 
         override fun parseResult(resultCode: Int, intent: Intent?): Result {
             if (resultCode != Activity.RESULT_OK) return Result.Canceled
-            return onPickedExistingPicturesFromLocalStorage(ctx, intent)
+            return onPickedExistingPicturesFromLocalStorage(ctx.invoke(), intent)
         }
     }
 
-    class Gallery(private val ctx: Context) : ActivityResultContract<Boolean, Result>() {
+    class Gallery(private val ctx: () -> Context) : ActivityResultContract<Boolean, Result>() {
         override fun createIntent(context: Context, multiple: Boolean): Intent = Intents.createGalleryIntent(multiple)
 
         override fun parseResult(resultCode: Int, intent: Intent?): Result {
             if (resultCode != Activity.RESULT_OK) return Result.Canceled
-            return onPickedExistingPictures(ctx, intent)
+            return onPickedExistingPictures(ctx.invoke(), intent)
         }
     }
 
-    class CameraForImage(private val ctx: Context,
-                         private val config: CopyConfig? = null) : ActivityResultContract<Unit, Result>(), HasFile {
+    class CameraForImage(
+        private val config: CopyConfig? = null,
+        private val ctx: () -> Context,
+    ) : ActivityResultContract<Unit, Result>(), HasFile {
         override var lastCameraFile: MediaFile? = null
 
         override fun createIntent(context: Context, input: Unit?): Intent =
-                Files.createCameraPictureFile(context).also { lastCameraFile = it }
-                        .let { Intents.createCameraForImageIntent(context, it.uri) }
+            Files.createCameraPictureFile(context).also { lastCameraFile = it }
+                .let { Intents.createCameraForImageIntent(context, it.uri) }
 
         override fun parseResult(resultCode: Int, intent: Intent?): Result {
             if (resultCode != Activity.RESULT_OK) {
                 removeCameraFileAndCleanup()
                 return Result.Canceled
             }
-            return onPictureReturnedFromCamera(ctx, lastCameraFile, config).also { cleanup() }
+            return onPictureReturnedFromCamera(ctx.invoke(), lastCameraFile, config).also { cleanup() }
         }
     }
 
-    class CameraForVideo(private val ctx: Context,
-                         private val config: CopyConfig? = null) : ActivityResultContract<Unit, Result>(), HasFile {
+    class CameraForVideo(
+        private val config: CopyConfig? = null,
+        private val ctx: () -> Context,
+    ) : ActivityResultContract<Unit, Result>(), HasFile {
         override var lastCameraFile: MediaFile? = null
 
         override fun createIntent(context: Context, input: Unit?): Intent =
-                Files.createCameraVideoFile(context).also { lastCameraFile = it }
-                        .let { Intents.createCameraForVideoIntent(context, it.uri) }
+            Files.createCameraVideoFile(context).also { lastCameraFile = it }
+                .let { Intents.createCameraForVideoIntent(context, it.uri) }
 
         override fun parseResult(resultCode: Int, intent: Intent?): Result {
             if (resultCode != Activity.RESULT_OK) {
                 removeCameraFileAndCleanup()
                 return Result.Canceled
             }
-            return onVideoReturnedFromCamera(ctx, lastCameraFile, config).also { cleanup() }
+            return onVideoReturnedFromCamera(ctx.invoke(), lastCameraFile, config).also { cleanup() }
         }
     }
 
@@ -166,15 +171,15 @@ object EasyContracts {
 
 
     class ChooserConfig(
-            val chooserTitle: String = "",
-            val chooserType: ChooserType = ChooserType.CAMERA_AND_DOCUMENTS,
-            copyImagesToPublicGalleryFolder: Boolean = false,
-            folderName: String? = null
+        val chooserTitle: String = "",
+        val chooserType: ChooserType = ChooserType.CAMERA_AND_DOCUMENTS,
+        copyImagesToPublicGalleryFolder: Boolean = false,
+        folderName: String? = null
     ) : CopyConfig(copyImagesToPublicGalleryFolder, folderName)
 
     open class CopyConfig(
-            val copyImagesToPublicGalleryFolder: Boolean = false,
-            val folderName: String? = null
+        val copyImagesToPublicGalleryFolder: Boolean = false,
+        val folderName: String? = null
     )
 
     interface HasFile {

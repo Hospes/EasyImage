@@ -13,13 +13,11 @@ import pl.aprilapps.easyphotopicker.ChooserType
 import pl.aprilapps.easyphotopicker.EasyContracts
 import pl.aprilapps.easyphotopicker.MediaFile
 
-private const val PHOTOS_KEY = "easy_image_photos_list"
-
-class ContractsActivity : AppCompatActivity(R.layout.activity_main) {
+class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var recyclerView: RecyclerView
     private lateinit var galleryButton: View
     private val photos = mutableListOf<MediaFile>()
-    private val imagesAdapter = ImagesAdapter(this, photos)
+    private val imagesAdapter = ImagesAdapter(photos)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +38,7 @@ class ContractsActivity : AppCompatActivity(R.layout.activity_main) {
             if (arePermissionsGranted(necessaryPermissions)) {
                 gallery.launch(true)
             } else {
-                requestPermissionsCompat(necessaryPermissions, MainActivity.GALLERY_REQUEST_CODE)
+                requestPermissionsCompat(necessaryPermissions, GALLERY_REQUEST_CODE)
             }
         }
 
@@ -50,7 +48,7 @@ class ContractsActivity : AppCompatActivity(R.layout.activity_main) {
             if (arePermissionsGranted(necessaryPermissions)) {
                 cameraImage.launch(null)
             } else {
-                requestPermissionsCompat(necessaryPermissions, MainActivity.CAMERA_REQUEST_CODE)
+                requestPermissionsCompat(necessaryPermissions, CAMERA_REQUEST_CODE)
             }
         }
 
@@ -59,7 +57,7 @@ class ContractsActivity : AppCompatActivity(R.layout.activity_main) {
             if (arePermissionsGranted(necessaryPermissions)) {
                 cameraVideo.launch(null)
             } else {
-                requestPermissionsCompat(necessaryPermissions, MainActivity.CAMERA_VIDEO_REQUEST_CODE)
+                requestPermissionsCompat(necessaryPermissions, CAMERA_VIDEO_REQUEST_CODE)
             }
         }
 
@@ -69,7 +67,7 @@ class ContractsActivity : AppCompatActivity(R.layout.activity_main) {
             if (arePermissionsGranted(necessaryPermissions)) {
                 documents.launch(null)
             } else {
-                requestPermissionsCompat(necessaryPermissions, MainActivity.DOCUMENTS_REQUEST_CODE)
+                requestPermissionsCompat(necessaryPermissions, DOCUMENTS_REQUEST_CODE)
             }
         }
 
@@ -78,7 +76,7 @@ class ContractsActivity : AppCompatActivity(R.layout.activity_main) {
             if (arePermissionsGranted(necessaryPermissions)) {
                 chooser.launch(true)
             } else {
-                requestPermissionsCompat(necessaryPermissions, MainActivity.CHOOSER_PERMISSIONS_REQUEST_CODE)
+                requestPermissionsCompat(necessaryPermissions, CHOOSER_PERMISSIONS_REQUEST_CODE)
             }
         }
 
@@ -92,25 +90,25 @@ class ContractsActivity : AppCompatActivity(R.layout.activity_main) {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == MainActivity.CHOOSER_PERMISSIONS_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == CHOOSER_PERMISSIONS_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             chooser.launch(true)
-        } else if (requestCode == MainActivity.CAMERA_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        } else if (requestCode == CAMERA_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             cameraImage.launch(null)
-        } else if (requestCode == MainActivity.CAMERA_VIDEO_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        } else if (requestCode == CAMERA_VIDEO_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             cameraVideo.launch(null)
-        } else if (requestCode == MainActivity.GALLERY_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        } else if (requestCode == GALLERY_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             gallery.launch(true)
-        } else if (requestCode == MainActivity.DOCUMENTS_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        } else if (requestCode == DOCUMENTS_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             documents.launch(null)
         }
     }
 
     private val chooserConfig = EasyContracts.ChooserConfig(chooserType = ChooserType.CAMERA_AND_GALLERY)
-    private val chooser = registerForActivityResult(EasyContracts.Chooser(this, chooserConfig)) { handleResult(it) }
-    private val documents = registerForActivityResult(EasyContracts.Documents(this)) { handleResult(it) }
-    private val gallery = registerForActivityResult(EasyContracts.Gallery(this)) { handleResult(it) }
-    private val cameraImage = registerForActivityResult(EasyContracts.CameraForImage(this)) { handleResult(it) }
-    private val cameraVideo = registerForActivityResult(EasyContracts.CameraForVideo(this)) { handleResult(it) }
+    private val chooser = registerForActivityResult(EasyContracts.Chooser(chooserConfig) { this }) { handleResult(it) }
+    private val documents = registerForActivityResult(EasyContracts.Documents { this }) { handleResult(it) }
+    private val gallery = registerForActivityResult(EasyContracts.Gallery { this }) { handleResult(it) }
+    private val cameraImage = registerForActivityResult(EasyContracts.CameraForImage { this }) { handleResult(it) }
+    private val cameraVideo = registerForActivityResult(EasyContracts.CameraForVideo { this }) { handleResult(it) }
 
 
     private fun handleResult(result: EasyContracts.Result) = when (result) {
@@ -133,5 +131,15 @@ class ContractsActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun requestPermissionsCompat(permissions: Array<String>, requestCode: Int) =
-            ActivityCompat.requestPermissions(this, permissions, requestCode)
+        ActivityCompat.requestPermissions(this, permissions, requestCode)
+
+    companion object {
+        private const val PHOTOS_KEY = "easy_image_photos_list"
+
+        private const val CHOOSER_PERMISSIONS_REQUEST_CODE = 7459
+        private const val CAMERA_REQUEST_CODE = 7500
+        private const val CAMERA_VIDEO_REQUEST_CODE = 7501
+        private const val GALLERY_REQUEST_CODE = 7502
+        private const val DOCUMENTS_REQUEST_CODE = 7503
+    }
 }
